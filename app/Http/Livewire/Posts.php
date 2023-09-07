@@ -24,7 +24,7 @@ class Posts extends Component
      *
      * @var array
      */
-    private function resetInputFields(){
+    public function resetInputFields(){
         $this->title = '';
         $this->body = '';
     }
@@ -38,15 +38,17 @@ class Posts extends Component
     {
         $validatedData = $this->validate([
             'title' => 'required',
-            'body' => 'required|email',
+            'body' => 'required',
         ]);
   
         Post::create($validatedData);
   
         //session()->flash('message', 'Post Created Successfully.');
-  
+        $this->dispatchBrowserEvent('closeModal'); 
+        $this->emit('userStore'); // Close model to using to jquery 
         $this->resetInputFields();
         $this->alertSuccess();
+
     }
   
     /**
@@ -96,6 +98,7 @@ class Posts extends Component
         $this->updateMode = false;
   
         //session()->flash('message', 'Post Updated Successfully.');
+        $this->dispatchBrowserEvent('closeModal'); 
         $this->alertSuccess();
         $this->resetInputFields();
   
