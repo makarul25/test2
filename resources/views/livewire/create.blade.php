@@ -1,7 +1,7 @@
 <form>
     <div class="form-group">
         <label for="exampleFormControlInput1">Title:</label>
-        <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Enter Title" wire:model.lazy="title">
+        <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Give Title" wire:model.lazy="title">
         @error('title') <span class="text-danger">{{ $message }}</span>@enderror
     </div>
     <div class="form-group">
