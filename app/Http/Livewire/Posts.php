@@ -4,19 +4,66 @@ namespace App\Http\Livewire;
 
 use Livewire\Component;
 use App\Models\Post;
+use Livewire\WithPagination;
+
+
 
 class Posts extends Component
 {
-    public $posts, $title, $body, $post_id;
+    protected $paginationTheme = 'bootstrap';
+    use WithPagination;
+    public $title, $body, $post_id, $searchTerm;
     public $updateMode = false;
+    public $sortColumn = 'created_at';
+    public $sortDirection = 'asc';
 
     protected $listeners = ['remove'];
 
+    public function sort($column)
+    {
+        $this->sortColumn = $column;
+        $this->sortDirection = $this->sortDirection == 'asc' ? 'desc' : 'asc';
+    }
+    private function headerConfig()
+    {
+        return [
+            'id' => 'ID',
+            'title' => 'Title',
+            'body' => 'body',
+            'created_at' => [
+                'label' => 'created at',
+                'func' => function($value) {
+                    return $value->diffForHumans();
+                }
+            
+            ],
+            'action' => 'Action'
+        ];
+    }
+    private function resultData()
+    {
+        return Post::where(function ($query) {
+            
+
+            if($this->searchTerm != "") {
+                $query->where('title', 'like', '%'.$this->searchTerm.'%');
+                $query->orWhere('body', 'like', '%'.$this->searchTerm.'%');
+            }
+        })
+        ->orderBy($this->sortColumn, $this->sortDirection)
+        ->paginate(5);
+    }
+
+
     public function render()
     {
-        $this->posts = Post::all();
+        
+        
         //dd($this->posts);
-        return view('livewire.posts');
+        return view('livewire.posts',[
+            'posts' => $this->resultData(),
+            'headers' => $this->headerConfig()
+        ]);
     }
   
     /**
@@ -45,7 +92,6 @@ class Posts extends Component
   
         //session()->flash('message', 'Post Created Successfully.');
         $this->dispatchBrowserEvent('closeModal'); 
-        $this->emit('userStore'); // Close model to using to jquery 
         $this->resetInputFields();
         $this->alertSuccess();
 
@@ -119,7 +165,7 @@ class Posts extends Component
     {
         $this->dispatchBrowserEvent('swal:modal', [
                 'type' => 'success',  
-                'message' => 'Created Successfully!', 
+                'message' => 'Completed Successfully!', 
                 'text' => 'It will list on the table soon.'
             ]);
     }
@@ -154,4 +200,5 @@ class Posts extends Component
                 'text' => 'It will not list on users table soon.'
             ]);
     }
+
 }
